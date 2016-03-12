@@ -61,10 +61,39 @@ public func uiImageForImage(image: Image) -> UIImage? {
     }
 }
 
-public func drawLine(start: Point2d<Int>, end: Point2d<Int>, colour: Colour, image: Image) {
+public func drawLine(var start: Point2d<Int>, var end: Point2d<Int>, colour: Colour, image: Image) {
+    var steepLine = false
+
+    // If total dy is greater than dx, we work on x and y swapped, and draw 
+    // them (y, x) in the call to setPixel. This prevents gaps when drawing
+    // steep lines.
+    if abs(start.x - end.x) < abs(start.y - end.y) {
+        start = Point2d(x: start.y, y: start.x)
+        end = Point2d(x: end.y, y: end.x)
+        steepLine = true
+    }
+
+    // If line direction is right to left, swap the points to make it left to
+    // right. This matches our drawing direction.
+    if (start.x > end.x) {
+        swap(&start, &end)
+    }
+
+    let deltaX = Double(end.x - start.x)
+    let deltaY = Double(end.y - start.y)
+    let deltaError = abs(deltaY / deltaX)
+    var totalError = 0.0
+    var y = start.y
     (start.x..<end.x).forEach { (x) in
-        let step = Double(x - start.x) / Double(end.x - start.x)
-        let y = Double(start.y) * (1.0 - step) + Double(end.y) * step
-        image.setPixel(Point2d(x: x, y: Int(y)), colour: colour)
+        if steepLine {
+            image.setPixel(Point2d(x: Int(y), y: x), colour: colour)
+        } else {
+            image.setPixel(Point2d(x: x, y: Int(y)), colour: colour)
+        }
+        totalError += deltaError
+        if totalError > 0.5 {
+            y += end.y > start.y ? 1 : -1
+            totalError -= 1
+        }
     }
 }
