@@ -79,10 +79,10 @@ public func drawLine(var start: Point2d<Int>, var end: Point2d<Int>, colour: Col
         swap(&start, &end)
     }
 
-    let deltaX = Double(end.x - start.x)
-    let deltaY = Double(end.y - start.y)
-    let deltaError = abs(deltaY / deltaX)
-    var totalError = 0.0
+    let deltaX = end.x - start.x
+    let deltaY = end.y - start.y
+    let deltaErrorTwice = abs(deltaY) * 2
+    var totalErrorTwice = 0
     var y = start.y
     (start.x..<end.x).forEach { (x) in
         if steepLine {
@@ -90,10 +90,10 @@ public func drawLine(var start: Point2d<Int>, var end: Point2d<Int>, colour: Col
         } else {
             image.setPixel(Point2d(x: x, y: Int(y)), colour: colour)
         }
-        totalError += deltaError
-        if totalError > 0.5 {
+        totalErrorTwice += deltaErrorTwice
+        if totalErrorTwice > deltaX {
             y += end.y > start.y ? 1 : -1
-            totalError -= 1
+            totalErrorTwice -= deltaX * 2
         }
     }
 }

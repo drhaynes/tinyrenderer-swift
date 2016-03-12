@@ -12,3 +12,4 @@ drawLine(Point2d(x: 40, y: 13), end: Point2d(x: 80, y: 220), colour: whiteColour
 drawLine(Point2d(x: 300, y: 120), end: Point2d(x: 13, y: 30), colour: redColour, image: image)
 
 let uiImage2 = uiImageForImage(image)
+
