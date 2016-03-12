@@ -30,14 +30,6 @@ class Image {
 
 typealias Colour = Pixel
 
-func drawLine(start: Point2d<Int>, end: Point2d<Int>, colour: Colour, image: Image) {
-    for (var t = 0.0; t < 1.0; t += 0.05) {
-        let x = Int(Double(start.x) * (1.0 - t)) + Int(Double(end.x) * t)
-        let y = Int(Double(start.y) * (1.0 - t)) + Int(Double(end.y) * t)
-        image.setPixel(Point2d(x: x, y: y), colour: colour)
-    }
-}
-
 func uiImageForImage(image: Image) -> UIImage? {
     guard image.pixels.count == (image.width * image.height) else {
         return nil
@@ -57,14 +49,23 @@ func uiImageForImage(image: Image) -> UIImage? {
     }
 }
 
-let width = 320
-let height = 240
+func drawLine(start: Point2d<Int>, end: Point2d<Int>, colour: Colour, image: Image) {
+    (start.x..<end.x).forEach { (x) in
+        let step = Double(x - start.x) / Double(end.x - start.x)
+        let y = Double(start.y) * (1.0 - step) + Double(end.y) * step
+        image.setPixel(Point2d(x: x, y: Int(y)), colour: colour)
+    }
+}
+
+let width = 90
+let height = 90
 let backgroundColour = Colour(r: 0, g: 0, b: 0)
 let pixels = [Pixel](count: width * height, repeatedValue: backgroundColour)
-var image = Image(width: width, height: height, pixels: pixels)
+let image = Image(width: width, height: height, pixels: pixels)
 let uiImage = uiImageForImage(image)
 let lineColour = Colour(r: 255, g: 255, b: 255)
-drawLine(Point2d(x: 40, y: 40), end: Point2d(x: 280, y: 120), colour: lineColour, image: image)
+drawLine(Point2d(x: 13, y: 20), end: Point2d(x: 80, y: 40), colour: lineColour, image: image)
+drawLine(Point2d(x: 20, y: 13), end: Point2d(x: 40, y: 80), colour: lineColour, image: image)
 let uiImage2 = uiImageForImage(image)
 
 
