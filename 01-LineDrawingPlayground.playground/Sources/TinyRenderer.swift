@@ -19,6 +19,14 @@ public struct Point2d<T> {
         self.x = x
         self.y = y
     }
+
+    /**
+     Convenience initialiser, useful for omitting x: & y: argument labels
+     */
+    public init(_ x: T, _ y: T) {
+        self.x = x
+        self.y = y
+    }
 }
 
 /**
