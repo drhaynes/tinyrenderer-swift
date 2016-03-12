@@ -1,5 +1,3 @@
-//: Playground - noun: a place where people can play
-
 import UIKit
 
 struct Point2d<T> {
@@ -14,22 +12,46 @@ struct Pixel {
     let a: UInt8 = 255
 }
 
-func createImage(width: Int, height: Int, pixels: [Pixel]) -> UIImage? {
-    guard pixels.count == (width * height) else {
+class Image {
+    let width: Int
+    let height: Int
+    var pixels: [Pixel]
+
+    init(width: Int, height: Int, pixels: [Pixel]) {
+        self.width = width
+        self.height = height
+        self.pixels = pixels
+    }
+
+    func setPixel(location: Point2d<Int>, colour: Colour) {
+        pixels[location.x + (pixels.count - (location.y * width))] = colour
+    }
+}
+
+typealias Colour = Pixel
+
+func drawLine(start: Point2d<Int>, end: Point2d<Int>, colour: Colour, image: Image) {
+    for (var t = 0.0; t < 1.0; t += 0.05) {
+        let x = Int(Double(start.x) * (1.0 - t)) + Int(Double(end.x) * t)
+        let y = Int(Double(start.y) * (1.0 - t)) + Int(Double(end.y) * t)
+        image.setPixel(Point2d(x: x, y: y), colour: colour)
+    }
+}
+
+func uiImageForImage(image: Image) -> UIImage? {
+    guard image.pixels.count == (image.width * image.height) else {
         return nil
     }
-    let dataProvider = CGDataProviderCreateWithCFData(
-        NSData(bytes: pixels, length: pixels.count * sizeof(Pixel))
-    )
 
+    let pixelData = NSData(bytes: image.pixels, length: image.pixels.count * sizeof(Pixel))
+    let dataProvider = CGDataProviderCreateWithCFData(pixelData)
     let bytesPerPixel = 4
     let bitsPerComponent = 8
     let colourSpace = CGColorSpaceCreateDeviceRGB()
     let bitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.PremultipliedLast.rawValue)
-    if let cgImage = CGImageCreate(width, height, bitsPerComponent, bytesPerPixel * 8, bytesPerPixel * width, colourSpace, bitmapInfo, dataProvider, nil, false, .RenderingIntentDefault) {
-        let image = UIImage(CGImage: cgImage)
-        UIImagePNGRepresentation(image)
-        return image
+
+    if let cgImage = CGImageCreate(image.width, image.height, bitsPerComponent, bytesPerPixel * 8, bytesPerPixel * width, colourSpace, bitmapInfo, dataProvider, nil, false, .RenderingIntentDefault) {
+        return UIImage(CGImage: cgImage)
     } else {
         return nil
     }
@@ -37,6 +59,12 @@ func createImage(width: Int, height: Int, pixels: [Pixel]) -> UIImage? {
 
 let width = 320
 let height = 240
-let redPixel = Pixel(r: 255, g: 0, b: 0)
-let pixelData = [Pixel](count: width * height, repeatedValue: redPixel)
-let image = createImage(width, height: height, pixels: pixelData)
+let backgroundColour = Colour(r: 0, g: 0, b: 0)
+let pixels = [Pixel](count: width * height, repeatedValue: backgroundColour)
+var image = Image(width: width, height: height, pixels: pixels)
+let uiImage = uiImageForImage(image)
+let lineColour = Colour(r: 255, g: 255, b: 255)
+drawLine(Point2d(x: 40, y: 40), end: Point2d(x: 280, y: 120), colour: lineColour, image: image)
+let uiImage2 = uiImageForImage(image)
+
+
