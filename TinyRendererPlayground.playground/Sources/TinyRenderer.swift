@@ -57,10 +57,16 @@ public struct Pixel {
 /// Convenience type to represent colours.
 public typealias Colour = Pixel
 
+extension Colour {
+    public static func white() -> Colour {
+        return Colour(r: 255, g: 255, b: 255)
+    }
+}
+
 /// Class representing an image.
 public class Image {
-    let width: Int
-    let height: Int
+    public let width: Int
+    public let height: Int
     var pixels: [Colour]
 
     /**
@@ -124,6 +130,12 @@ public func uiImageForImage(image: Image) -> UIImage? {
  - parameter image:  Image the line will be drawn in.
  */
 public func drawLine(var start: Point2d<Int>, var end: Point2d<Int>, colour: Colour, image: Image) {
+
+    guard start.x < image.width && start.y < image.height && end.x < image.width && end.y < image.height else {
+        print("Tried to draw line outside image")
+        return
+    }
+
     var steepLine = false
 
     // If total dy is greater than dx, we work on x and y swapped, and draw 
@@ -157,5 +169,105 @@ public func drawLine(var start: Point2d<Int>, var end: Point2d<Int>, colour: Col
             y += end.y > start.y ? 1 : -1
             totalErrorTwice -= deltaX * 2
         }
+    }
+}
+
+public struct Vector3<T> {
+    public let x: T
+    public let y: T
+    public let z: T
+
+    init(x: T, y: T, z: T) {
+        self.x = x
+        self.y = y
+        self.z = z
+    }
+
+    public init(_ x: T, _ y: T, _ z: T) {
+        self.x = x
+        self.y = y
+        self.z = z
+    }
+}
+
+public struct Mesh {
+    public let vertices: [Vector3<Float>]
+    public let faces: [Vector3<Int>]
+
+    public init(vertices: [Vector3<Float>], faces: [Vector3<Int>]) {
+        self.vertices = vertices
+        self.faces = faces
+    }
+
+    public init?(objPath: String) {
+        guard let streamReader = StreamReader(path: objPath) else {
+            return nil
+        }
+        defer {
+            streamReader.close()
+        }
+        var vertices = [Vector3<Float>]()
+        var faces = [Vector3<Int>]()
+        while let line = streamReader.nextLine() {
+            let tokens = line.componentsSeparatedByString(" ")
+            switch tokens[0] {
+            case "v":
+                vertices.append(Vector3(Float(tokens[1])!, Float(tokens[2])!, Float(tokens[3])!))
+                break
+            case "f":
+                let triplet1 = tokens[1].componentsSeparatedByString("/")
+                let triplet2 = tokens[2].componentsSeparatedByString("/")
+                let triplet3 = tokens[3].componentsSeparatedByString("/")
+                let face = Vector3(Int(triplet1[0])! - 1, Int(triplet2[0])! - 1, Int(triplet3[0])! - 1)
+                faces.append(face)
+                break
+            default:
+                break
+            }
+        }
+        self.vertices = vertices
+        self.faces = faces
+    }
+}
+
+public func renderMesh(model: Mesh, image: Image) {
+    (0..<model.faces.count).forEach { (index) in
+        let face = model.faces[index]
+        let vertex1 = model.vertices[face.x]
+        let vertex2 = model.vertices[face.y]
+        let vertex3 = model.vertices[face.z]
+
+        let halfWidth = Float(image.width / 2)
+        let halfHeight = Float(image.height / 2)
+
+        let vertex1NormalisedX = (vertex1.x + 1.0) * halfWidth
+        let vertex1NormalisedY = (vertex1.y + 1.0) * halfHeight
+        let vertex2NormalisedX = (vertex2.x + 1.0) * halfWidth
+        let vertex2NormalisedY = (vertex2.y + 1.0) * halfHeight
+        let vertex3NormalisedX = (vertex3.x + 1.0) * halfWidth
+        let vertex3NormalisedY = (vertex3.y + 1.0) * halfHeight
+
+        //TODO: remove hack, fix the root cause of drawing to y=0 blowing up
+        let v1y = vertex1NormalisedY == 0 ? 1 : vertex1NormalisedY
+        let v2y = vertex2NormalisedY == 0 ? 1 : vertex2NormalisedY
+        let v3y = vertex3NormalisedY == 0 ? 1 : vertex3NormalisedY
+        let v1x = vertex1NormalisedX == 0 ? 1 : vertex1NormalisedX
+        let v2x = vertex2NormalisedX == 0 ? 1 : vertex2NormalisedX
+        let v3x = vertex3NormalisedX == 0 ? 1 : vertex3NormalisedX
+
+        // 1-2
+        let startPoint = Point2d(Int(v1x), Int(v1y))
+        let endPoint = Point2d(Int(v2x), Int(v2y))
+        drawLine(startPoint, end: endPoint, colour: Colour.white(), image: image)
+
+        // 2-3
+        let startPoint2 = Point2d(Int(v2x), Int(v2y))
+        let endPoint2 = Point2d(Int(v3x), Int(v3y))
+        drawLine(startPoint2, end: endPoint2, colour: Colour.white(), image: image)
+
+        // 3-1
+        let startPoint3 = Point2d(Int(v3x), Int(v3y))
+        let endPoint3 = Point2d(Int(v1x), Int(v1y))
+        drawLine(startPoint3, end: endPoint3, colour: Colour.white(), image: image)
     }
 }

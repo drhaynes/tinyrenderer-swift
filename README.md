@@ -10,4 +10,4 @@ The project is split into multiple playgrounds to illustrate various concepts.
 
 ### 2. Wireframe Rendering
 
-Coming soon...
+![Wireframe Rendering](images/wireframe-rendering.png)
