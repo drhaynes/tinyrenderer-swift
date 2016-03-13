@@ -14,9 +14,3 @@ public func createImage(width width: Int, height: Int, backgroundColour: Colour 
     let pixels = [Pixel](count: width * height, repeatedValue: backgroundColour)
     return Image(width: width, height: height, pixels: pixels)
 }
-
-public func loadObjModelNamed(name: String) -> MDLAsset {
-    let path = NSBundle.mainBundle().pathForResource(name, ofType: "obj")!
-    let url = NSURL(fileURLWithPath: path)
-    return MDLAsset(URL: url)
-}
