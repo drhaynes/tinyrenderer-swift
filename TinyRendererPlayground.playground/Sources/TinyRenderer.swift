@@ -61,6 +61,14 @@ extension Colour {
     public static func white() -> Colour {
         return Colour(r: 255, g: 255, b: 255)
     }
+
+    public static func red() -> Colour {
+        return Colour(r: 255, g: 0, b: 0)
+    }
+
+    public static func lightBlue() -> Colour {
+        return Colour(r: 128, g: 128, b: 255)
+    }
 }
 
 /// Class representing an image.
