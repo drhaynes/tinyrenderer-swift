@@ -1,4 +1,4 @@
-import Foundation
+import ModelIO
 
 /**
  Create an image of particular size and fill it with the specified colour. If no
@@ -13,4 +13,10 @@ import Foundation
 public func createImage(width width: Int, height: Int, backgroundColour: Colour = Colour(r: 0, g: 0, b: 0)) -> Image {
     let pixels = [Pixel](count: width * height, repeatedValue: backgroundColour)
     return Image(width: width, height: height, pixels: pixels)
+}
+
+public func loadObjModelNamed(name: String) -> MDLAsset {
+    let path = NSBundle.mainBundle().pathForResource(name, ofType: "obj")!
+    let url = NSURL(fileURLWithPath: path)
+    return MDLAsset(URL: url)
 }
