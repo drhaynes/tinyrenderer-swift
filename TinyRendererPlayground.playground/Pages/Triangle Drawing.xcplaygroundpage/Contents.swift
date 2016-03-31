@@ -8,8 +8,8 @@ let triangle2 = Triangle(Point2d(180, 50), Point2d(150, 10), Point2d(70, 180))
 let triangle3 = Triangle(Point2d(180, 150), Point2d(120, 160), Point2d(130, 180))
 
 drawTriangle(triangle1, colour: Colour.red(), image: image)
-drawTriangle(triangle2, colour: Colour.white(), image: image)
-drawTriangle(triangle3, colour: Colour.lightBlue(), image: image)
+drawTriangle(triangle2, colour: Colour.yellow(), image: image)
+drawTriangle(triangle3, colour: Colour.green(), image: image)
 
 let uiImage = uiImageForImage(image)
 

@@ -48,6 +48,10 @@ public struct Vector3<T> {
     }
 }
 
+public func Vector3Zero(type: Any) -> Vector3<Float> {
+    return Vector3(0.0, 0.0, 0.0)
+}
+
 /**
  *  Generic triangle type.
  */
@@ -66,5 +70,28 @@ public struct Triangle<T> {
         self.p1 = p1
         self.p2 = p2
         self.p3 = p3
+    }
+
+    func axisAlignedBoundingBox() -> (Point2d<T>, Point2d<T>) {
+        var minX = p1.x
+        var maxX = p1.x
+        var minY = p1.y
+        var maxY = p1.y
+
+        minX = min(minX, p2.x)
+        minX = min(minX, p3.x)
+        maxX = max(maxX, p2.x)
+        maxX = max(maxX, p3.x)
+
+        minY = min(minY, p2.y)
+        minY = min(minY, p3.y)
+        maxY = max(maxY, p2.y)
+        maxY = max(maxY, p3.y)
+
+        return (Point2d(minX, minY), Point2d(maxX, maxY))
+    }
+
+    func barycentric(point: Point2d<T>) -> Vector3<Float> {
+        return Vector3Zero()
     }
 }

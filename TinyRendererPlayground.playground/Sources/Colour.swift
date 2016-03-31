@@ -38,4 +38,12 @@ extension Colour {
     public static func lightBlue() -> Colour {
         return Colour(r: 128, g: 128, b: 255)
     }
+
+    public static func green() -> Colour {
+        return Colour(r: 0, g: 255, b: 0)
+    }
+
+    public static func yellow() -> Colour {
+        return Colour(r: 255, g: 255, b: 0)
+    }
 }

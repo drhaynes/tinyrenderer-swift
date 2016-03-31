@@ -113,6 +113,9 @@ public func renderWireframe(model: Mesh, image: Image) {
  - parameter image: The image to render into.
  */
 public func drawTriangle(triangle: Triangle<Int>, colour: Colour, image: Image) {
+    let topLeft = Point2d(image.width - 1, image.height - 1)
+    let bottomRight = Point2d(0, 0)
+    let clamp = topLeft
     drawLine(triangle.p1, end: triangle.p2, colour: colour, image: image)
     drawLine(triangle.p2, end: triangle.p3, colour: colour, image: image)
     drawLine(triangle.p3, end: triangle.p1, colour: colour, image: image)
