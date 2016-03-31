@@ -30,7 +30,7 @@ public struct Point2d<T: Comparable> {
 /**
  *  Generic 3 component vector.
  */
-public struct Vector3<T: Comparable> {
+public struct Vector3<T: ArithmeticType> {
     public let x: T
     public let y: T
     public let z: T
@@ -45,6 +45,13 @@ public struct Vector3<T: Comparable> {
         self.x = x
         self.y = y
         self.z = z
+    }
+
+    public func crossProduct(other: Vector3<T>) -> Vector3<T> {
+        let x = (self.y * other.z) - (other.y * self.z)
+        let y = (self.z * other.x) - (other.z * self.x)
+        let z = (self.x * other.y) - (other.x * self.y)
+        return Vector3(x, y, z)
     }
 }
 
@@ -87,7 +94,7 @@ public struct Triangle<T: Comparable> {
         return (Point2d(minX, minY), Point2d(maxX, maxY))
     }
 
-    public func barycentric<U: Comparable>(point: Point2d<U>) -> Vector3<U> {
+    public func barycentric<T: Comparable>(point: Point2d<T>) -> Vector3<T> {
         return Vector3(point.x, point.x, point.x)
     }
 }
