@@ -3,5 +3,6 @@
     <pages>
         <page name='Line Drawing'/>
         <page name='Wireframe Rendering'/>
+        <page name='Triangle Drawing'/>
     </pages>
 </playground>
