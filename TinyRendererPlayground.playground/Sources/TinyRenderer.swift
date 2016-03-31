@@ -113,10 +113,16 @@ public func renderWireframe(model: Mesh, image: Image) {
  - parameter image: The image to render into.
  */
 public func drawTriangle(triangle: Triangle<Int>, colour: Colour, image: Image) {
-    let topLeft = Point2d(image.width - 1, image.height - 1)
-    let bottomRight = Point2d(0, 0)
-    let clamp = topLeft
-    drawLine(triangle.p1, end: triangle.p2, colour: colour, image: image)
-    drawLine(triangle.p2, end: triangle.p3, colour: colour, image: image)
-    drawLine(triangle.p3, end: triangle.p1, colour: colour, image: image)
+    let bounds = triangle.axisAlignedBoundingBox()
+    for x in bounds.0.x...bounds.1.x {
+        for y in bounds.0.y...bounds.1.y {
+            let point = Point2d(x, y)
+            let coordinate = triangle.barycentric(point)
+            if coordinate.x < 0 || coordinate.y < 0 || coordinate.z < 0 {
+                continue
+            } else {
+                image.setPixel(point, colour: colour)
+            }
+        }
+    }
 }

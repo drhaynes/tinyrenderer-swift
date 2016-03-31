@@ -1,7 +1,7 @@
 /**
  *  Generic two dimensional point.
  */
-public struct Point2d<T> {
+public struct Point2d<T: Comparable> {
     let x: T
     let y: T
 
@@ -30,7 +30,7 @@ public struct Point2d<T> {
 /**
  *  Generic 3 component vector.
  */
-public struct Vector3<T> {
+public struct Vector3<T: Comparable> {
     public let x: T
     public let y: T
     public let z: T
@@ -48,14 +48,10 @@ public struct Vector3<T> {
     }
 }
 
-public func Vector3Zero(type: Any) -> Vector3<Float> {
-    return Vector3(0.0, 0.0, 0.0)
-}
-
 /**
  *  Generic triangle type.
  */
-public struct Triangle<T> {
+public struct Triangle<T: Comparable> {
     let p1: Point2d<T>
     let p2: Point2d<T>
     let p3: Point2d<T>
@@ -72,7 +68,7 @@ public struct Triangle<T> {
         self.p3 = p3
     }
 
-    func axisAlignedBoundingBox() -> (Point2d<T>, Point2d<T>) {
+    public func axisAlignedBoundingBox() -> (Point2d<T>, Point2d<T>) {
         var minX = p1.x
         var maxX = p1.x
         var minY = p1.y
@@ -91,7 +87,7 @@ public struct Triangle<T> {
         return (Point2d(minX, minY), Point2d(maxX, maxY))
     }
 
-    func barycentric(point: Point2d<T>) -> Vector3<Float> {
-        return Vector3Zero()
+    public func barycentric<U: Comparable>(point: Point2d<U>) -> Vector3<U> {
+        return Vector3(point.x, point.x, point.x)
     }
 }
