@@ -1,7 +1,5 @@
 //: [Previous](@previous)
 
-import Foundation
-
 let image = Image(width: 320, height: 240)
 let triangle1 = Triangle(Point2d(30, 90), Point2d(70, 190), Point2d(130, 30))
 let triangle2 = Triangle(Point2d(230, 70), Point2d(190, 50), Point2d(120, 180))
@@ -12,6 +10,5 @@ drawTriangle(triangle2, colour: Colour.yellow(), image: image)
 drawTriangle(triangle3, colour: Colour.green(), image: image)
 
 let uiImage = uiImageForImage(image)
-
 
 //: [Next](@next)
