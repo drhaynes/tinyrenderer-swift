@@ -8,5 +8,5 @@ public protocol ArithmeticType: Comparable {
 }
 
 extension Int: ArithmeticType {}
-extension Float: ArithmeticType {}
 extension Double: ArithmeticType {}
+extension Float: ArithmeticType {}

@@ -58,7 +58,7 @@ public struct Vector3<T: ArithmeticType> {
 /**
  *  Generic triangle type.
  */
-public struct Triangle<T: Comparable> {
+public struct Triangle<T: ArithmeticType> {
     let p1: Point2d<T>
     let p2: Point2d<T>
     let p3: Point2d<T>
@@ -92,9 +92,5 @@ public struct Triangle<T: Comparable> {
         maxY = max(maxY, p3.y)
 
         return (Point2d(minX, minY), Point2d(maxX, maxY))
-    }
-
-    public func barycentric<T: Comparable>(point: Point2d<T>) -> Vector3<T> {
-        return Vector3(point.x, point.x, point.x)
     }
 }

@@ -117,12 +117,27 @@ public func drawTriangle(triangle: Triangle<Int>, colour: Colour, image: Image) 
     for x in bounds.0.x...bounds.1.x {
         for y in bounds.0.y...bounds.1.y {
             let point = Point2d(x, y)
-            let coordinate = triangle.barycentric(point)
-            if coordinate.x < 0 || coordinate.y < 0 || coordinate.z < 0 {
-                continue
-            } else {
+            if triangleContainsPoint(triangle, point: point) {
                 image.setPixel(point, colour: colour)
             }
         }
     }
 }
+
+func triangleContainsPoint(triangle: Triangle<Int>, point: Point2d<Int>) -> Bool {
+    let v1 = Vector3(Float(triangle.p3.x - triangle.p1.x), Float(triangle.p2.x - triangle.p1.x), Float(triangle.p1.x - point.x))
+    let v2 = Vector3(Float(triangle.p3.y - triangle.p1.y), Float(triangle.p2.y - triangle.p1.y), Float(triangle.p1.y - point.y))
+    let u = v1.crossProduct(v2)
+
+    let x = 1.0 - (u.x + u.y) / u.z
+    let y = u.y / u.z
+    let z = u.x / u.z
+    let baryCentricCoordinate = Vector3(x, y, z)
+    
+    if baryCentricCoordinate.x < 0 || baryCentricCoordinate.y < 0 || baryCentricCoordinate.z < 0 {
+        return false
+    } else {
+        return true
+    }
+}
+
