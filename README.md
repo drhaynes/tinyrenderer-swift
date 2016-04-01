@@ -11,3 +11,7 @@ The project is split into multiple playgrounds to illustrate various concepts.
 ### 2. Wireframe Rendering
 
 ![Wireframe Rendering](images/wireframe-rendering.png)
+
+### 3. Triangle Rasterisation
+
+![Triangle Rasterisation](images/triangle-rasterisation.png)

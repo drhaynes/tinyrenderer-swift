@@ -1,7 +1,7 @@
 /**
  *  Generic two dimensional point.
  */
-public struct Point2d<T> {
+public struct Point2d<T: Comparable> {
     let x: T
     let y: T
 
@@ -30,7 +30,7 @@ public struct Point2d<T> {
 /**
  *  Generic 3 component vector.
  */
-public struct Vector3<T> {
+public struct Vector3<T: ArithmeticType> {
     public let x: T
     public let y: T
     public let z: T
@@ -46,16 +46,19 @@ public struct Vector3<T> {
         self.y = y
         self.z = z
     }
-}
 
-public func Vector3Zero(type: Any) -> Vector3<Float> {
-    return Vector3(0.0, 0.0, 0.0)
+    public func crossProduct(other: Vector3<T>) -> Vector3<T> {
+        let x = (self.y * other.z) - (other.y * self.z)
+        let y = (self.z * other.x) - (other.z * self.x)
+        let z = (self.x * other.y) - (other.x * self.y)
+        return Vector3(x, y, z)
+    }
 }
 
 /**
  *  Generic triangle type.
  */
-public struct Triangle<T> {
+public struct Triangle<T: ArithmeticType> {
     let p1: Point2d<T>
     let p2: Point2d<T>
     let p3: Point2d<T>
@@ -72,7 +75,7 @@ public struct Triangle<T> {
         self.p3 = p3
     }
 
-    func axisAlignedBoundingBox() -> (Point2d<T>, Point2d<T>) {
+    public func axisAlignedBoundingBox() -> (Point2d<T>, Point2d<T>) {
         var minX = p1.x
         var maxX = p1.x
         var minY = p1.y
@@ -89,9 +92,5 @@ public struct Triangle<T> {
         maxY = max(maxY, p3.y)
 
         return (Point2d(minX, minY), Point2d(maxX, maxY))
-    }
-
-    func barycentric(point: Point2d<T>) -> Vector3<Float> {
-        return Vector3Zero()
     }
 }
