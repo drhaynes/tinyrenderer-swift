@@ -1,6 +1,6 @@
 import UIKit
 
-/// Class representing an image.
+/// Reference type used to represent an image.
 public class Image {
     public let width: Int
     public let height: Int

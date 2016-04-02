@@ -141,3 +141,6 @@ func triangleContainsPoint(triangle: Triangle<Int>, point: Point2d<Int>) -> Bool
     }
 }
 
+public func renderFlatShaded(model: Mesh, image: Image) {
+}
+

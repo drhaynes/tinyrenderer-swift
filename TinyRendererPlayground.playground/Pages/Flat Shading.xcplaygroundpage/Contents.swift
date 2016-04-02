@@ -6,8 +6,8 @@ let image = Image(width: 640, height: 640)
 let path = NSBundle.mainBundle().pathForResource("head", ofType: "obj")!
 let mesh = Mesh(objPath: path)!
 
-renderWireframe(mesh, image: image)
+renderFlatShaded(mesh, image: image)
 
-let uiImage = uiImageForImage(image)
+uiImageForImage(image)
 
 //: [Next](@next)
