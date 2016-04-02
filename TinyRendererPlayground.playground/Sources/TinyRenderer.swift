@@ -70,38 +70,17 @@ public func renderWireframe(model: Mesh, image: Image) {
         let vertex2 = model.vertices[face.y]
         let vertex3 = model.vertices[face.z]
 
-        let halfWidth = Float(image.width / 2)
-        let halfHeight = Float(image.height / 2)
-
-        let vertex1NormalisedX = (vertex1.x + 1.0) * halfWidth
-        let vertex1NormalisedY = (vertex1.y + 1.0) * halfHeight
-        let vertex2NormalisedX = (vertex2.x + 1.0) * halfWidth
-        let vertex2NormalisedY = (vertex2.y + 1.0) * halfHeight
-        let vertex3NormalisedX = (vertex3.x + 1.0) * halfWidth
-        let vertex3NormalisedY = (vertex3.y + 1.0) * halfHeight
-
-        //TODO: remove hack, fix the root cause of drawing to y=0 blowing up
-        let v1y = vertex1NormalisedY == 0 ? 1 : vertex1NormalisedY
-        let v2y = vertex2NormalisedY == 0 ? 1 : vertex2NormalisedY
-        let v3y = vertex3NormalisedY == 0 ? 1 : vertex3NormalisedY
-        let v1x = vertex1NormalisedX == 0 ? 1 : vertex1NormalisedX
-        let v2x = vertex2NormalisedX == 0 ? 1 : vertex2NormalisedX
-        let v3x = vertex3NormalisedX == 0 ? 1 : vertex3NormalisedX
-
         // 1-2
-        let startPoint = Point2d(Int(v1x), Int(v1y))
-        let endPoint = Point2d(Int(v2x), Int(v2y))
-        drawLine(startPoint, end: endPoint, colour: Colour.white(), image: image)
+        let point1 = screenCoordinateForWorldCoordinate(vertex1, image: image)
+        let point2 = screenCoordinateForWorldCoordinate(vertex2, image: image)
+        drawLine(point1, end: point2, colour: Colour.white(), image: image)
 
         // 2-3
-        let startPoint2 = Point2d(Int(v2x), Int(v2y))
-        let endPoint2 = Point2d(Int(v3x), Int(v3y))
-        drawLine(startPoint2, end: endPoint2, colour: Colour.white(), image: image)
+        let point3 = screenCoordinateForWorldCoordinate(vertex3, image: image)
+        drawLine(point2, end: point3, colour: Colour.white(), image: image)
 
         // 3-1
-        let startPoint3 = Point2d(Int(v3x), Int(v3y))
-        let endPoint3 = Point2d(Int(v1x), Int(v1y))
-        drawLine(startPoint3, end: endPoint3, colour: Colour.white(), image: image)
+        drawLine(point3, end: point1, colour: Colour.white(), image: image)
     }
 }
 
@@ -142,5 +121,32 @@ func triangleContainsPoint(triangle: Triangle<Int>, point: Point2d<Int>) -> Bool
 }
 
 public func renderFlatShaded(model: Mesh, image: Image) {
+    (0..<model.faces.count).forEach { (index) in
+        let face = model.faces[index]
+
+    }
 }
 
+/**
+ Projects a 3d coordinate from world space into 2d image space orthographically.
+ 
+ Coordinates will be scaled both horiztonally and vertically to fit the image
+ dimensions.
+
+ - parameter coordinate: The world-space 3d coordinate to project.
+ - parameter image: The image to project into.
+ */
+
+func screenCoordinateForWorldCoordinate(coordinate: Vector3<Float>, image: Image) -> Point2d<Int> {
+    let halfWidth = Float(image.width / 2)
+    let halfHeight = Float(image.height / 2)
+
+    let vertex1NormalisedX = (coordinate.x + 1.0) * halfWidth
+    let vertex1NormalisedY = (coordinate.y + 1.0) * halfHeight
+
+    //TODO: remove hack, fix the root cause of drawing to y=0 blowing up
+    let y = vertex1NormalisedY == 0 ? 1 : vertex1NormalisedY
+    let x = vertex1NormalisedX == 0 ? 1 : vertex1NormalisedX
+
+    return Point2d(Int(x), Int(y))
+}
