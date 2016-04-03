@@ -1,3 +1,6 @@
+
+import Foundation // for sqrt
+
 /**
  *  Generic two dimensional point.
  */
@@ -48,11 +51,24 @@ public struct Vector3<T: ArithmeticType> {
     }
 
     public func crossProduct(other: Vector3<T>) -> Vector3<T> {
-        let x = (self.y * other.z) - (other.y * self.z)
-        let y = (self.z * other.x) - (other.z * self.x)
-        let z = (self.x * other.y) - (other.x * self.y)
-        return Vector3(x, y, z)
+        let crossX = (y * other.z) - (other.y * z)
+        let crossY = (z * other.x) - (other.z * x)
+        let crossZ = (x * other.y) - (other.x * y)
+        return Vector3(crossX, crossY, crossZ)
     }
+
+    public func dotProduct(other: Vector3<T>) -> T {
+        return (x * other.x) + (y * other.y) + (z * other.z)
+    }
+}
+
+public func normalise(vector: Vector3<Float>) -> Vector3<Float> {
+    let length = sqrtf((vector.x * vector.x) + (vector.y * vector.y) + (vector.z * vector.z))
+    return Vector3(vector.x / length, vector.y / length, vector.z / length)
+}
+
+func - <T: ArithmeticType>(left: Vector3<T>, right: Vector3<T>) -> Vector3<T> {
+    return Vector3(left.x - right.x, left.y - right.y, left.z - right.z)
 }
 
 /**

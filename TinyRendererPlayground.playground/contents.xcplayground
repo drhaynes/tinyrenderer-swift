@@ -4,5 +4,6 @@
         <page name='Line Drawing'/>
         <page name='Wireframe Rendering'/>
         <page name='Triangle Drawing'/>
+        <page name='Flat Shading'/>
     </pages>
 </playground>

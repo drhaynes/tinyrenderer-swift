@@ -65,43 +65,28 @@ public func drawLine(start: Point2d<Int>, end: Point2d<Int>, colour: Colour, ima
  */
 public func renderWireframe(model: Mesh, image: Image) {
     (0..<model.faces.count).forEach { (index) in
+        let triangle = projectModelFaceIntoScreenSpaceTriangle(model.faces[index], model: model, image: image)
+        drawLine(triangle.p1, end: triangle.p2, colour: Colour.white(), image: image)
+        drawLine(triangle.p2, end: triangle.p3, colour: Colour.white(), image: image)
+        drawLine(triangle.p3, end: triangle.p1, colour: Colour.white(), image: image)
+    }
+}
+
+/**
+ Renders a mesh into an image using a flat shaded style.
+
+ - parameter model: The mesh model to render.
+ - parameter image: The image to render into.
+ */
+public func renderFlatShaded(model: Mesh, image: Image, lightDirection: Vector3<Float>) {
+    (0..<model.faces.count).forEach { (index) in
         let face = model.faces[index]
-        let vertex1 = model.vertices[face.x]
-        let vertex2 = model.vertices[face.y]
-        let vertex3 = model.vertices[face.z]
-
-        let halfWidth = Float(image.width / 2)
-        let halfHeight = Float(image.height / 2)
-
-        let vertex1NormalisedX = (vertex1.x + 1.0) * halfWidth
-        let vertex1NormalisedY = (vertex1.y + 1.0) * halfHeight
-        let vertex2NormalisedX = (vertex2.x + 1.0) * halfWidth
-        let vertex2NormalisedY = (vertex2.y + 1.0) * halfHeight
-        let vertex3NormalisedX = (vertex3.x + 1.0) * halfWidth
-        let vertex3NormalisedY = (vertex3.y + 1.0) * halfHeight
-
-        //TODO: remove hack, fix the root cause of drawing to y=0 blowing up
-        let v1y = vertex1NormalisedY == 0 ? 1 : vertex1NormalisedY
-        let v2y = vertex2NormalisedY == 0 ? 1 : vertex2NormalisedY
-        let v3y = vertex3NormalisedY == 0 ? 1 : vertex3NormalisedY
-        let v1x = vertex1NormalisedX == 0 ? 1 : vertex1NormalisedX
-        let v2x = vertex2NormalisedX == 0 ? 1 : vertex2NormalisedX
-        let v3x = vertex3NormalisedX == 0 ? 1 : vertex3NormalisedX
-
-        // 1-2
-        let startPoint = Point2d(Int(v1x), Int(v1y))
-        let endPoint = Point2d(Int(v2x), Int(v2y))
-        drawLine(startPoint, end: endPoint, colour: Colour.white(), image: image)
-
-        // 2-3
-        let startPoint2 = Point2d(Int(v2x), Int(v2y))
-        let endPoint2 = Point2d(Int(v3x), Int(v3y))
-        drawLine(startPoint2, end: endPoint2, colour: Colour.white(), image: image)
-
-        // 3-1
-        let startPoint3 = Point2d(Int(v3x), Int(v3y))
-        let endPoint3 = Point2d(Int(v1x), Int(v1y))
-        drawLine(startPoint3, end: endPoint3, colour: Colour.white(), image: image)
+        let triangle = projectModelFaceIntoScreenSpaceTriangle(face, model: model, image: image)
+        let normal = normalForFace(face, inModel: model)
+        let lightIntensity = normal.dotProduct(lightDirection)
+        if lightIntensity > 0 {
+            drawTriangle(triangle, colour: Colour.white(UInt8(lightIntensity * Float(255))), image: image)
+        }
     }
 }
 
@@ -124,6 +109,14 @@ public func drawTriangle(triangle: Triangle<Int>, colour: Colour, image: Image) 
     }
 }
 
+/**
+ Determines if a point is inside a given triangle.
+
+ - parameter triangle: The triangle of interest.
+ - parameter point: The point to test.
+
+ - returns: True if the point is inside the given triangle, false if outside.
+ */
 func triangleContainsPoint(triangle: Triangle<Int>, point: Point2d<Int>) -> Bool {
     let v1 = Vector3(Float(triangle.p3.x - triangle.p1.x), Float(triangle.p2.x - triangle.p1.x), Float(triangle.p1.x - point.x))
     let v2 = Vector3(Float(triangle.p3.y - triangle.p1.y), Float(triangle.p2.y - triangle.p1.y), Float(triangle.p1.y - point.y))
@@ -141,3 +134,59 @@ func triangleContainsPoint(triangle: Triangle<Int>, point: Point2d<Int>) -> Bool
     }
 }
 
+/**
+ Projects a 3d coordinate from world space into 2d image space orthographically.
+
+ Coordinates will be scaled both horiztonally and vertically to fit the image
+ dimensions.
+
+ - parameter coordinate: The world-space 3d coordinate to project.
+ - parameter image: The image to project into.
+
+ - returns: The projected point.
+ */
+func screenCoordinateForWorldCoordinate(coordinate: Vector3<Float>, image: Image) -> Point2d<Int> {
+    let halfWidth = Float(image.width / 2)
+    let halfHeight = Float(image.height / 2)
+
+    let vertex1NormalisedX = (coordinate.x + 1.0) * halfWidth
+    let vertex1NormalisedY = (coordinate.y + 1.0) * halfHeight
+
+    //TODO: remove hack, fix the root cause of drawing to y=0 blowing up
+    let y = vertex1NormalisedY == 0 ? 1 : vertex1NormalisedY
+    let x = vertex1NormalisedX == 0 ? 1 : vertex1NormalisedX
+
+    return Point2d(Int(x), Int(y))
+}
+
+/**
+ Projects a face consisting of three 3d coordinates from world space into 2d
+ image space orthographically.
+
+ Coordinates will be scaled both horiztonally and vertically to fit the image
+ dimensions.
+
+ - parameter face: The world-space 3d face to project (must be triangular).
+ - parameter mode: The model the face belongs to. This is used to look up vertices.
+ - parameter image: The image to project into.
+
+ - returns: The projected triangle.
+ */
+func projectModelFaceIntoScreenSpaceTriangle(face: Vector3<Int>, model: Mesh, image: Image) -> Triangle<Int> {
+    let vertex1 = model.vertices[face.x]
+    let vertex2 = model.vertices[face.y]
+    let vertex3 = model.vertices[face.z]
+
+    let point1 = screenCoordinateForWorldCoordinate(vertex1, image: image)
+    let point2 = screenCoordinateForWorldCoordinate(vertex2, image: image)
+    let point3 = screenCoordinateForWorldCoordinate(vertex3, image: image)
+    return Triangle(point1, point2, point3)
+}
+
+func normalForFace(face: Vector3<Int>, inModel model: Mesh) -> Vector3<Float> {
+    let vertex1 = model.vertices[face.x]
+    let vertex2 = model.vertices[face.y]
+    let vertex3 = model.vertices[face.z]
+
+    return normalise((vertex3 - vertex1).crossProduct(vertex2 - vertex1))
+}

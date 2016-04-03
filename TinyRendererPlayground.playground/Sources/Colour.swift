@@ -27,8 +27,8 @@ public struct Pixel {
 public typealias Colour = Pixel
 
 extension Colour {
-    public static func white() -> Colour {
-        return Colour(r: 255, g: 255, b: 255)
+    public static func white(intensity: UInt8 = 255) -> Colour {
+        return Colour(r: intensity, g: intensity, b: intensity)
     }
 
     public static func red() -> Colour {
