@@ -78,10 +78,15 @@ public func renderWireframe(model: Mesh, image: Image) {
  - parameter model: The mesh model to render.
  - parameter image: The image to render into.
  */
-public func renderFlatShaded(model: Mesh, image: Image) {
+public func renderFlatShaded(model: Mesh, image: Image, lightDirection: Vector3<Float>) {
     (0..<model.faces.count).forEach { (index) in
-        let triangle = projectModelFaceIntoScreenSpaceTriangle(model.faces[index], model: model, image: image)
-        drawTriangle(triangle, colour: Colour.white(), image: image)
+        let face = model.faces[index]
+        let triangle = projectModelFaceIntoScreenSpaceTriangle(face, model: model, image: image)
+        let normal = normalForFace(face, inModel: model)
+        let lightIntensity = normal.dotProduct(lightDirection)
+        if lightIntensity > 0 {
+            drawTriangle(triangle, colour: Colour.white(UInt8(lightIntensity * Float(255))), image: image)
+        }
     }
 }
 
@@ -176,4 +181,12 @@ func projectModelFaceIntoScreenSpaceTriangle(face: Vector3<Int>, model: Mesh, im
     let point2 = screenCoordinateForWorldCoordinate(vertex2, image: image)
     let point3 = screenCoordinateForWorldCoordinate(vertex3, image: image)
     return Triangle(point1, point2, point3)
+}
+
+func normalForFace(face: Vector3<Int>, inModel model: Mesh) -> Vector3<Float> {
+    let vertex1 = model.vertices[face.x]
+    let vertex2 = model.vertices[face.y]
+    let vertex3 = model.vertices[face.z]
+
+    return normalise((vertex3 - vertex1).crossProduct(vertex2 - vertex1))
 }
