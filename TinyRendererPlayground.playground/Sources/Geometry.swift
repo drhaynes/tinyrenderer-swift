@@ -64,7 +64,7 @@ public struct Vector3<T: ArithmeticType> {
 
 public func normalise(vector: Vector3<Float>) -> Vector3<Float> {
     let length = sqrtf((vector.x * vector.x) + (vector.y * vector.y) + (vector.z * vector.z))
-    return Vector3<Float>(Float(vector.x / length), Float(vector.y / length), Float(vector.z / length))
+    return Vector3(vector.x / length, vector.y / length, vector.z / length)
 }
 
 func - <T: ArithmeticType>(left: Vector3<T>, right: Vector3<T>) -> Vector3<T> {
