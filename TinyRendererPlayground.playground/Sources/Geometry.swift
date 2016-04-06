@@ -75,23 +75,23 @@ func - <T: ArithmeticType>(left: Vector3<T>, right: Vector3<T>) -> Vector3<T> {
  *  Generic triangle type.
  */
 public struct Triangle<T: ArithmeticType> {
-    let p1: Point2d<T>
-    let p2: Point2d<T>
-    let p3: Point2d<T>
+    let p1: Vector3<T>
+    let p2: Vector3<T>
+    let p3: Vector3<T>
 
-    public init(p1: Point2d<T>, p2: Point2d<T>, p3: Point2d<T>) {
+    public init(p1: Vector3<T>, p2: Vector3<T>, p3: Vector3<T>) {
         self.p1 = p1
         self.p2 = p2
         self.p3 = p3
     }
 
-    public init(_ p1: Point2d<T>, _ p2: Point2d<T>, _ p3: Point2d<T>) {
+    public init(_ p1: Vector3<T>, _ p2: Vector3<T>, _ p3: Vector3<T>) {
         self.p1 = p1
         self.p2 = p2
         self.p3 = p3
     }
 
-    public func axisAlignedBoundingBox() -> (Point2d<T>, Point2d<T>) {
+    public func axisAlignedBoundingBox() -> (Vector3<T>, Vector3<T>) {
         var minX = p1.x
         var maxX = p1.x
         var minY = p1.y
@@ -107,6 +107,14 @@ public struct Triangle<T: ArithmeticType> {
         maxY = max(maxY, p2.y)
         maxY = max(maxY, p3.y)
 
-        return (Point2d(minX, minY), Point2d(maxX, maxY))
+        return (Vector3(minX, minY, p1.z), Vector3(maxX, maxY, p1.z))
     }
+}
+
+public func depthForBarycentricCoordinate(coordinate: Vector3<Float>, triangle: Triangle<Float>) -> Float {
+    var depth: Float = 0.0
+    depth += triangle.p1.z * coordinate.x
+    depth += triangle.p2.z * coordinate.y
+    depth += triangle.p3.z * coordinate.z
+    return depth
 }

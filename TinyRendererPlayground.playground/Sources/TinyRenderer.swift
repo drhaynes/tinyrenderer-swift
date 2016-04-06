@@ -66,9 +66,12 @@ public func drawLine(start: Point2d<Int>, end: Point2d<Int>, colour: Colour, ima
 public func renderWireframe(model: Mesh, image: Image) {
     (0..<model.faces.count).forEach { (index) in
         let triangle = projectModelFaceIntoScreenSpaceTriangle(model.faces[index], model: model, image: image)
-        drawLine(triangle.p1, end: triangle.p2, colour: Colour.white(), image: image)
-        drawLine(triangle.p2, end: triangle.p3, colour: Colour.white(), image: image)
-        drawLine(triangle.p3, end: triangle.p1, colour: Colour.white(), image: image)
+        let p1 = Point2d(Int(triangle.p1.x), Int(triangle.p1.y))
+        let p2 = Point2d(Int(triangle.p2.x), Int(triangle.p2.y))
+        let p3 = Point2d(Int(triangle.p3.x), Int(triangle.p3.y))
+        drawLine(p1, end: p2, colour: Colour.white(), image: image)
+        drawLine(p2, end: p3, colour: Colour.white(), image: image)
+        drawLine(p3, end: p1, colour: Colour.white(), image: image)
     }
 }
 
@@ -97,13 +100,18 @@ public func renderFlatShaded(model: Mesh, image: Image, lightDirection: Vector3<
  - parameter colour: The colour to render the triangle.
  - parameter image: The image to render into.
  */
-public func drawTriangle(triangle: Triangle<Int>, colour: Colour, image: Image) {
+public func drawTriangle(triangle: Triangle<Float>, colour: Colour, image: Image) {
     let bounds = triangle.axisAlignedBoundingBox()
-    for x in bounds.0.x...bounds.1.x {
-        for y in bounds.0.y...bounds.1.y {
+    for x in Int(bounds.0.x)...Int(bounds.1.x) {
+        for y in Int(bounds.0.y)...Int(bounds.1.y) {
             let point = Point2d(x, y)
-            if triangleContainsPoint(triangle, point: point) {
-                image.setPixel(point, colour: colour)
+            let barycentricCoordinate = barycentricCoordinateForTrianglePoint(triangle, point: point)
+            if barycentricCoordinateShouldBeRendered(barycentricCoordinate) {
+                let depth = depthForBarycentricCoordinate(barycentricCoordinate, triangle: triangle)
+                if image.readDepth(point) < depth {
+                    image.setDepth(point, value: depth)
+                    image.setPixel(point, colour: colour)
+                }
             }
         }
     }
@@ -117,16 +125,18 @@ public func drawTriangle(triangle: Triangle<Int>, colour: Colour, image: Image) 
 
  - returns: True if the point is inside the given triangle, false if outside.
  */
-func triangleContainsPoint(triangle: Triangle<Int>, point: Point2d<Int>) -> Bool {
-    let v1 = Vector3(Float(triangle.p3.x - triangle.p1.x), Float(triangle.p2.x - triangle.p1.x), Float(triangle.p1.x - point.x))
-    let v2 = Vector3(Float(triangle.p3.y - triangle.p1.y), Float(triangle.p2.y - triangle.p1.y), Float(triangle.p1.y - point.y))
+func barycentricCoordinateForTrianglePoint(triangle: Triangle<Float>, point: Point2d<Int>) -> Vector3<Float> {
+    let v1 = Vector3(triangle.p3.x - triangle.p1.x, triangle.p2.x - triangle.p1.x, triangle.p1.x - Float(point.x))
+    let v2 = Vector3(triangle.p3.y - triangle.p1.y, triangle.p2.y - triangle.p1.y, triangle.p1.y - Float(point.y))
     let u = v1.crossProduct(v2)
 
     let x = 1.0 - (u.x + u.y) / u.z
     let y = u.y / u.z
     let z = u.x / u.z
-    let baryCentricCoordinate = Vector3(x, y, z)
-    
+    return Vector3(x, y, z)
+}
+
+func barycentricCoordinateShouldBeRendered(baryCentricCoordinate: Vector3<Float>) -> Bool {
     if baryCentricCoordinate.x < 0 || baryCentricCoordinate.y < 0 || baryCentricCoordinate.z < 0 {
         return false
     } else {
@@ -145,7 +155,7 @@ func triangleContainsPoint(triangle: Triangle<Int>, point: Point2d<Int>) -> Bool
 
  - returns: The projected point.
  */
-func screenCoordinateForWorldCoordinate(coordinate: Vector3<Float>, image: Image) -> Point2d<Int> {
+func screenCoordinateForWorldCoordinate(coordinate: Vector3<Float>, image: Image) -> Vector3<Float> {
     let halfWidth = Float(image.width / 2)
     let halfHeight = Float(image.height / 2)
 
@@ -156,7 +166,7 @@ func screenCoordinateForWorldCoordinate(coordinate: Vector3<Float>, image: Image
     let y = vertex1NormalisedY == 0 ? 1 : vertex1NormalisedY
     let x = vertex1NormalisedX == 0 ? 1 : vertex1NormalisedX
 
-    return Point2d(Int(x), Int(y))
+    return Vector3(x, y, coordinate.z)
 }
 
 /**
@@ -164,15 +174,15 @@ func screenCoordinateForWorldCoordinate(coordinate: Vector3<Float>, image: Image
  image space orthographically.
 
  Coordinates will be scaled both horiztonally and vertically to fit the image
- dimensions.
+ dimensions. Depth will be preserved in the z coordinate.
 
  - parameter face: The world-space 3d face to project (must be triangular).
  - parameter mode: The model the face belongs to. This is used to look up vertices.
  - parameter image: The image to project into.
 
- - returns: The projected triangle.
+ - returns: The projected triangle with z-depth.
  */
-func projectModelFaceIntoScreenSpaceTriangle(face: Vector3<Int>, model: Mesh, image: Image) -> Triangle<Int> {
+func projectModelFaceIntoScreenSpaceTriangle(face: Vector3<Int>, model: Mesh, image: Image) -> Triangle<Float> {
     let vertex1 = model.vertices[face.x]
     let vertex2 = model.vertices[face.y]
     let vertex3 = model.vertices[face.z]

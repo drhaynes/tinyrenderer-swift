@@ -1,9 +1,9 @@
 //: [Previous](@previous)
 
 let image = Image(width: 320, height: 240)
-let triangle1 = Triangle(Point2d(30, 90), Point2d(70, 190), Point2d(130, 30))
-let triangle2 = Triangle(Point2d(230, 70), Point2d(190, 50), Point2d(120, 180))
-let triangle3 = Triangle(Point2d(220, 170), Point2d(260, 140), Point2d(280, 200))
+let triangle1 = Triangle<Float>(Vector3(30, 90, 1), Vector3(70, 190, 1), Vector3(130, 30, 1))
+let triangle2 = Triangle<Float>(Vector3(230, 70, 1), Vector3(190, 50, 1), Vector3(120, 180, 1))
+let triangle3 = Triangle<Float>(Vector3(220, 170, 1), Vector3(260, 140, 1), Vector3(280, 200, 1))
 
 drawTriangle(triangle1, colour: Colour.red(), image: image)
 drawTriangle(triangle2, colour: Colour.yellow(), image: image)
