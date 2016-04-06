@@ -5,6 +5,7 @@ public class Image {
     public let width: Int
     public let height: Int
     var pixels: [Pixel]
+    var depthBuffer: [Float]
 
     /**
      Initialser
@@ -15,10 +16,11 @@ public class Image {
 
      - returns: An image with the values specified.
      */
-    public init(width: Int, height: Int, pixels: [Pixel]) {
+    public init(width: Int, height: Int, pixels: [Pixel], depthBuffer: [Float]) {
         self.width = width
         self.height = height
         self.pixels = pixels
+        self.depthBuffer = depthBuffer
     }
 
     /**
@@ -33,7 +35,8 @@ public class Image {
      */
     public convenience init(width: Int, height: Int, backgroundColour: Colour = Colour(r: 0, g: 0, b: 0)) {
         let pixels = [Pixel](count: width * height, repeatedValue: backgroundColour)
-        self.init(width: width, height: height, pixels: pixels)
+        let depthBuffer = [Float](count: width * height, repeatedValue: Float(0.0))
+        self.init(width: width, height: height, pixels: pixels, depthBuffer: depthBuffer)
     }
 
     /**
@@ -43,7 +46,19 @@ public class Image {
      - parameter colour:   Colour to set the specified pixel.
      */
     public func setPixel(location: Point2d<Int>, colour: Colour) {
-        pixels[location.x + (pixels.count - (location.y * width))] = colour
+        pixels[indexForPoint(location)] = colour
+    }
+
+    public func setDepth(location: Point2d<Int>, value: Float) {
+        depthBuffer[indexForPoint(location)] = value
+    }
+
+    public func readDepth(location: Point2d<Int>) -> Float {
+        return depthBuffer[indexForPoint(location)]
+    }
+
+    func indexForPoint(point: Point2d<Int>) -> Int {
+        return point.x + (pixels.count - (point.y * width))
     }
 }
 
