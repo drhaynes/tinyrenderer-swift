@@ -1,0 +1,7 @@
+texturing:
+
+* read normals and uvs from obj
+* load texture to our own texture object
+* store reference to texture in model
+* sample texture when rasterising triangle
+
